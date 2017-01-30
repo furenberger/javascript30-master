@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Whack A Mole!</title>
+  <link href='https://fonts.googleapis.com/css?family=Amatic+SC:400,700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="site-header">
+      <div><h1>Whack-a-mole! <span class="score">0</span></h1></div>
+      <div data-alert class="hidden"><h1>Times Up!</h1></div>
+      <div class="startButton"><button onClick="startGame()">Start!</button></div>
+  </header>
+
+  <main class="site-content">
+    <div class="game">
+      <div class="hole hole1">
+        <div class="mole"></div>
+      </div>
+      <div class="hole hole2">
+        <div class="mole"></div>
+      </div>
+      <div class="hole hole3">
+        <div class="mole"></div>
+      </div>
+      <div class="hole hole4">
+        <div class="mole"></div>
+      </div>
+      <div class="hole hole5">
+        <div class="mole"></div>
+      </div>
+      <div class="hole hole6">
+        <div class="mole"></div>
+      </div>
+    </div>
+  </main>
+
+<script>
+  const alert = document.querySelector('[data-alert]');
+  const startButton = document.querySelector('.startButton');
+  const holes = document.querySelectorAll('.hole');
+  const scoreBoard = document.querySelector('.score');
+  const moles = document.querySelectorAll('.mole');
+  let lastHole;
+  let timeUp = false;
+  let score = 0;
+
+  function randomTime(min, max) {
+      return Math.round(Math.random() * (max - min) + min) ;
+  }
+
+  function randomHole(holes) {
+      const index = Math.floor(Math.random() * holes.length);
+      const hole = holes[index];
+
+      //if you found the same one , call itself again to get a new hole
+      if(hole === lastHole){
+          return randomHole(holes);
+      }
+
+      //save reference to the last hole called
+      lastHole = hole;
+      return hole;
+  }
+
+  function peep() {
+      const time = randomTime(200,1000);
+      const hole = randomHole(holes);
+
+      hole.classList.add('up');
+
+      setTimeout(() => {
+          hole.classList.remove('up');
+          //run the game again!
+          if(!timeUp){
+              peep();
+          }
+      },time);
+  }
+
+  function startGame() {
+      scoreBoard.textContent = 0;
+      timeUp = false;
+      score = 0;
+      alert.classList.add('hidden');
+      startButton.classList.add('hidden');
+      peep();
+
+      //after 10 seconds stop the game
+      setTimeout(() =>{
+          timeUp = true;
+          alert.classList.remove('hidden');
+          startButton.classList.remove('hidden');
+      },10000);
+  }
+
+  function bonk(event){
+    if(!event.isTrusted){
+        //user has faked a click
+        return;
+    }
+
+    score++;
+    //you hit the mole remove it now
+    this.classList.remove('up');
+    scoreBoard.textContent = score;
+
+  }
+
+  moles.forEach(mole => mole.addEventListener('click', bonk));
+
+</script>
+</body>
+</html>
